@@ -1,11 +1,13 @@
 #!/bin/bash
 
 START_TIME=$(date +%s)
+
 USERID=$(id -u)
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
+
 LOGS_FOLDER="/var/log/roboshop-logs"
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
@@ -17,10 +19,10 @@ echo "Script started executing at: $(date)" | tee -a $LOG_FILE
 
 app_setup(){
 
-    id roboshop
+    id roboshop &>>$LOG_FILE
     if [ $? -ne 0 ]
     then
-        useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>LOG_FILE
+        useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop  &>>LOG_FILE
         VALIDATE $? "Creating roboshop system user"
     else
         echo -e "system user roboshop already created  ... $Y SKIPPING $N"
