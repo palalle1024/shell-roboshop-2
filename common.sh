@@ -40,7 +40,28 @@ app_setup(){
     VALIDATE $? "Unzipping $app_name"
 }
 
+python_setup(){
 
+    dnf install python3 gcc python3-devel -y
+    VALIDATE $? "Installing python3 package"
+
+    pip3 install -r requirements.txt &>>$LOG_FILE
+    VALIDATE $? "downloading dependencies"
+
+}
+
+java_setup(){
+    
+    dnf install maven -y &>>$LOG_FILE
+    VALIDATE $? "Installing maven"
+
+    mvn clean package &>>$LOG_FILE
+    VALIDATE $? "Packaging the shipping application" 
+
+    mv target/shipping-1.0.jar shipping.jar  &>>$LOG_FILE
+    VALIDATE $? "Moving and renaming Jar file"
+
+}
 
 nodejs_setup () {
    
