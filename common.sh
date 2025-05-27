@@ -42,7 +42,7 @@ app_setup(){
 
 python_setup(){
 
-    dnf install python3 gcc python3-devel -y
+    dnf install python3 gcc python3-devel -y &>>LOG_FILE
     VALIDATE $? "Installing python3 package"
 
     pip3 install -r requirements.txt &>>$LOG_FILE
@@ -51,7 +51,7 @@ python_setup(){
 }
 
 java_setup(){
-    
+
     dnf install maven -y &>>$LOG_FILE
     VALIDATE $? "Installing maven"
 
