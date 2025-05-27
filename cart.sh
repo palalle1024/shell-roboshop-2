@@ -4,7 +4,7 @@ source ./common.sh
 app_name=cart
 
 check_root
-app-setup
+app_setup
 nodejs_setup
 systemd_setup
 print_time
