@@ -8,6 +8,7 @@ app_setup
 nodejs_setup
 systemd_setup
 
+
 dnf install mongodb-mongosh -y &>>LOG_FILE
 VALIDATE $? "Installing Mongodb client"
 
