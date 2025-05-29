@@ -9,10 +9,11 @@ nodejs_setup
 systemd_setup
 
 
+
 cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo &>>LOG_FILE
 VALIDATE $? "copying mongoDB repo"
 
-dnf install mongodb-mongosh -y  &>>LOG_FILE
+dnf install mongodb-mongosh -y &>>LOG_FILE
 VALIDATE $? "Installing Mongodb client"
 
 
@@ -24,6 +25,4 @@ then
 else
     echo -e "Data is already loaded ... $Y SKIPPING $N"
 fi
-
-print_time
 
