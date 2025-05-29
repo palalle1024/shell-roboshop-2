@@ -9,7 +9,10 @@ nodejs_setup
 systemd_setup
 
 
-dnf install mongodb-mongosh -y &>>LOG_FILE
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo &>>LOG_FILE
+VALIDATE $? "copying mongoDB repo"
+
+dnf install mongodb-mongosh -y  &>>LOG_FILE
 VALIDATE $? "Installing Mongodb client"
 
 
