@@ -2,7 +2,7 @@
 
 AMI_ID="ami-09c813fb71547fc4f"
 SG_ID="sg-00224112cda97e2f8"
-INSTANCES=("mongodb" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend" "mysql")
+INSTANCES=("mongodb" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend" "mysql" "redis")
 ZONE_ID="Z00673021VD75JSZ5QC6N"
 DOMAIN_NAME="palalle.site"
 
