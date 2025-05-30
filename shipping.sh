@@ -9,7 +9,7 @@ echo "Please enter root password to setup"
 read -s MYSQL_ROOT_PASSWORD
 
 app_setup
-java_setup
+maven_setup
 systemd_setup
 
 
