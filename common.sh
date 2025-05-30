@@ -1,127 +1,38 @@
 #!/bin/bash
 
-START_TIME=$(date +%s)
+source ./common.sh
+check_root
 
-USERID=$(id -u)
-R="\e[31m"
-G="\e[32m"
-Y="\e[33m"
-N="\e[0m"
+dnf module disable nginx -y &>>$LOG_FILE
+VALIDATE $? "Disabling Default Nginx"
 
-LOGS_FOLDER="/var/log/roboshop-logs"
-SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
-LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
-SCRIPT_DIR=$PWD
+dnf module enable nginx:1.24 -y &>>$LOG_FILE
+VALIDATE $? "Enabling Nginx:1.24"
 
-mkdir -p $LOGS_FOLDER
-echo "Script started executing at: $(date)" | tee -a $LOG_FILE
+dnf install nginx -y &>>$LOG_FILE
+VALIDATE $? "Installing Nginx"
 
+systemctl enable nginx  &>>$LOG_FILE
+systemctl start nginx 
+VALIDATE $? "Starting Nginx"
 
-app_setup(){
+rm -rf /usr/share/nginx/html/* &>>$LOG_FILE
+VALIDATE $? "Removing default content"
 
-    id roboshop &>>$LOG_FILE
-    if [ $? -ne 0 ]
-    then
-        useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop  &>>LOG_FILE
-        VALIDATE $? "Creating roboshop system user"
-    else
-        echo -e "system user roboshop already created  ... $Y SKIPPING $N"
-    fi
+curl -o /tmp/frontend.zip https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading frontend"
 
-    mkdir -p /app 
-    VALIDATE $? "Creating app Directory"
+cd /usr/share/nginx/html 
+unzip /tmp/frontend.zip &>>$LOG_FILE
+VALIDATE $? "unzipping frontend"
 
-    curl -o /tmp/$app_name.zip https://roboshop-artifacts.s3.amazonaws.com/$app_name-v3.zip &>>LOG_FILE
-    VALIDATE $? "Downloading $app_name"
+rm -rf /etc/nginx/nginx.conf &>>$LOG_FILE
+VALIDATE $? "Remove default nginx conf"
 
-    rm -rf /app/*
-    cd /app &>>LOG_FILE
-    unzip /tmp/$app_name.zip &>>LOG_FILE
-    VALIDATE $? "Unzipping $app_name"
-}
+cp $SCRIPT_DIR/nginx.conf /etc/nginx/nginx.conf
+VALIDATE $? "Copying nginx.conf"
 
-python_setup(){
+systemctl restart nginx 
+VALIDATE $? "Restarting nginx"
 
-    dnf install python3 gcc python3-devel -y &>>LOG_FILE
-    VALIDATE $? "Installing python3 package"
-
-    pip3 install -r requirements.txt &>>$LOG_FILE
-    VALIDATE $? "downloading dependencies"
-
-}
-
-java_setup(){
-
-    dnf install maven -y &>>$LOG_FILE
-    VALIDATE $? "Installing maven"
-
-    mvn clean package &>>$LOG_FILE
-    VALIDATE $? "Packaging the shipping application" 
-
-    mv target/shipping-1.0.jar shipping.jar  &>>$LOG_FILE
-    VALIDATE $? "Moving and renaming Jar file"
-
-}
-
-nodejs_setup () {
-   
-    dnf module disable nodejs -y &>>$LOG_FILE
-    VALIDATE $? "Disabling default nodejs"
-
-    dnf module enable nodejs:20 -y &>>$LOG_FILE
-    VALIDATE $? "Enabling nodejs:20"
-
-    dnf install nodejs -y &>>$LOG_FILE
-    VALIDATE $? "Installing nodejs:20"
-
-    npm install &>>$LOG_FILE
-    VALIDATE $? "Installing Dependencies"
-
-}
-
-systemd_setup(){
-
-    cp $SCRIPT_DIR/$app_name.service /etc/systemd/system/$app_name.service &>>LOG_FILE
-    VALIDATE $? "copying $app_name.service"
-
-    systemctl daemon-reload
-    systemctl enable $app_name 
-    systemctl start $app_name &>>LOG_FILE
-    VALIDATE $? "Starting $app_name"
-
-}
-
-
-# check the user has root priveleges or not
-check_root(){
-    if [ $USERID -ne 0 ]
-    then
-        echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
-        exit 1 #give other than 0 upto 127
-    else
-        echo "You are running with root access" | tee -a $LOG_FILE
-    fi
-}
-
-
-# validate functions takes input as exit status, what command they tried to install
-VALIDATE(){
-    if [ $1 -eq 0 ]
-    then
-        echo -e "$2 is ... $G SUCCESS $N" | tee -a $LOG_FILE
-    else
-        echo -e "$2 is ... $R FAILURE $N" | tee -a $LOG_FILE
-        exit 1
-    fi
-}
-
-
-print_time(){
-    END_TIME=$(date +%s)
-    TOTAL_TIME=$(( $END_TIME - $START_TIME ))
-    echo -e "Script executed successfully, $Y Time taken: $TOTAL_TIME seconds $N"
-}
-
-
-
-
+print_time 
